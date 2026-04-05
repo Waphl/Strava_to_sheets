@@ -54,7 +54,6 @@ def avg_pace(distance_m, time_s):
     
 @app.route("/webhook", methods=["GET", "POST"])
 def webhook():
-    # Strava verification challenge (runs once when you register the webhook)
     if request.method == "GET":
         challenge = request.args.get("hub.challenge")
         token     = request.args.get("hub.verify_token")
@@ -62,12 +61,10 @@ def webhook():
             return jsonify({"hub.challenge": challenge})
         return "Forbidden", 403
 
-    # Incoming activity event
     data = request.json
-    if data.get("object_type") == "activity" and data.get("aspect_type") == "create":
+    if data.get("object_type") == "activity" and data.get("aspect_type") in ("create", "update"):
         activity = fetch_activity(data["object_id"])
 
-        # Only log runs
         if activity.get("type") != "Run":
             return "OK", 200
 
@@ -79,10 +76,18 @@ def webhook():
             avg_pace(activity.get("distance", 0), activity.get("moving_time", 0)),
             activity.get("description", ""),
             activity.get("perceived_exertion", ""),
+            str(data["object_id"]),
         ]
 
-        get_sheet().append_row(row)
+        sheet = get_sheet()
+        existing_row = find_row_by_activity_id(sheet, data["object_id"])
 
+        if existing_row:
+            sheet.update(f"A{existing_row}:H{existing_row}", [row])
+        else:
+            sheet.append_row(row)
+
+    return "OK", 200
     return "OK", 200
 
 if __name__ == "__main__":
