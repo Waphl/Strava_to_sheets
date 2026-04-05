@@ -52,8 +52,10 @@ def avg_pace(distance_m, time_s):
     mins, secs = divmod(int(secs_per_mile), 60)
     return f"{mins}:{secs:02d}/mi"
     
-@app.route("/webhook", methods=["GET", "POST"])
+@app.route("/webhook", methods=["GET", "POST", "HEAD"])
 def webhook():
+    if request.method == "HEAD":
+        return "OK", 200
     if request.method == "GET":
         challenge = request.args.get("hub.challenge")
         token     = request.args.get("hub.verify_token")
