@@ -38,6 +38,13 @@ def meters_to_miles(m):
 def seconds_to_hms(s):
     return str(timedelta(seconds=int(s)))[2:]
 
+def find_row_by_activity_id(sheet, activity_id):
+    col = sheet.col_values(8)  # Activity ID is column 8
+    for i, val in enumerate(col):
+        if val == str(activity_id):
+            return i + 1  # Sheets rows are 1-indexed
+    return None
+
 def avg_pace(distance_m, time_s):
     if distance_m == 0:
         return "—"
