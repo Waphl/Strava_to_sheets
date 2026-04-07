@@ -13,7 +13,7 @@ def get_sheet():
     scopes = ["https://www.googleapis.com/auth/spreadsheets"]
     creds = Credentials.from_service_account_info(creds_dict, scopes=scopes)
     client = gspread.authorize(creds)
-    return client.open_by_key(os.environ["GOOGLE_SHEET_ID"])
+    return client.open_by_key(os.environ["GOOGLE_SHEET_ID"]).sheet1
 
 def get_access_token():
     resp = requests.post("https://www.strava.com/oauth/token", data={
@@ -89,7 +89,6 @@ def webhook():
         else:
             sheet.append_row(row)
 
-    return "OK", 200
     return "OK", 200
 
 if __name__ == "__main__":
